@@ -1,10 +1,12 @@
-from http.server import SimpleHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler
 import os
 
-def handler(request, response):
-    with open(os.path.join(os.path.dirname(__file__), 'index.html'), 'r') as f:
-        html = f.read()
-    response.status_code = 200
-    response.headers['Content-Type'] = 'text/html'
-    response.body = html
-    return response
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        html_path = os.path.join(os.path.dirname(__file__), 'index.html')
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html = f.read()
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(html.encode('utf-8'))
