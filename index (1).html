@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ── SEO ── -->
+<title>Clariva — AI Care Coordinator for Healthcare Clinics</title>
+<meta name="description" content="Clariva answers every patient call, books appointments, sends reminders, and follows up with patients — automatically, 24/7. The AI patient communication platform for modern healthcare practices.">
+<meta name="keywords" content="AI care coordinator, healthcare AI, clinic automation, patient call handling, appointment booking AI, medical care coordinator">
+<meta name="author" content="Clariva Technologies">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://clariva.ai/">
+
+<!-- ── OPEN GRAPH (LinkedIn, WhatsApp, Facebook) ── -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://clariva.ai/">
+<meta property="og:title" content="Clariva — Your clinic, always answered.">
+<meta property="og:description" content="AI that answers every patient call, books appointments, sends reminders, and follows up automatically. 24/7. No staff needed.">
+<meta property="og:image" content="https://clariva.ai/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Clariva">
+<meta property="og:locale" content="en_GB">
+
+<!-- ── TWITTER CARD ── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://clariva.ai/">
+<meta name="twitter:title" content="Clariva — Your clinic, always answered.">
+<meta name="twitter:description" content="AI that answers every patient call, books appointments, and sends reminders automatically. 24/7.">
+<meta name="twitter:image" content="https://clariva.ai/og-image.png">
+
+<!-- ── FONTS ── -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:        #f8faf8;
+  --white:     #ffffff;
+  --surface:   #f0f5f1;
+  --border:    #dce8de;
+  --sage:      #4a7c59;
+  --sage-d:    #3a6347;
+  --sage-l:    #7aab89;
+  --sage-p:    #e8f2ea;
+  --sage-pp:   #d0e8d4;
+  --charcoal:  #1e2a22;
+  --ink:       #2d3d32;
+  --mid:       #5a6e60;
+  --muted:     #8fa094;
+  --text:      #2d3d32;
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Plus Jakarta Sans', sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+  cursor:none;
+}
+a,button { cursor:none; }
+
+/* subtle grain */
+body::after {
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.018'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9000;
+}
+
+/* ── CURSOR ── */
+.cursor { position:fixed; width:8px; height:8px; background:var(--sage); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:transform .15s; }
+.cursor-ring { position:fixed; width:30px; height:30px; border:1px solid rgba(74,124,89,.35); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:all .2s ease; opacity:.6; }
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:500;
+  height:68px; padding:0 64px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(248,250,248,.95); backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo {
+  font-family:'Playfair Display', serif;
+  font-size:22px; font-weight:500; letter-spacing:.02em;
+  color:var(--charcoal); text-decoration:none;
+  display:flex; align-items:center; gap:10px;
+}
+.logo-dot {
+  width:8px; height:8px; background:var(--sage); border-radius:50%;
+  animation:breathe 2.5s ease-in-out infinite;
+}
+.l4-mark {
+  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+}
+.l4-mark svg { width:100%; height:100%; }
+.l4-text {
+  font-family:'DM Sans', sans-serif;
+  font-size:20px; font-weight:500; letter-spacing:-.01em;
+  color:var(--charcoal);
+}
+.l4-text span { color:var(--sage); }
+.nav-links { display:flex; gap:36px; list-style:none; }
+.nav-links a {
+  font-size:12px; font-weight:400; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--mid); text-decoration:none; position:relative; padding-bottom:3px;
+  transition:color .2s;
+}
+.nav-links a::after { content:''; position:absolute; bottom:0; left:0; width:0; height:1px; background:var(--sage); transition:width .3s; }
+.nav-links a:hover { color:var(--charcoal); }
+.nav-links a:hover::after { width:100%; }
+.nav-cta {
+  font-size:12px; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--white); background:var(--sage); padding:11px 26px;
+  text-decoration:none; border:1px solid var(--sage); transition:all .25s;
+}
+.nav-cta:hover { background:var(--sage-d); border-color:var(--sage-d); }
+
+/* ── HERO ── */
+.hero {
+  min-height:100vh; padding:120px 64px 80px;
+  display:grid; grid-template-columns:1.05fr .95fr;
+  gap:72px; align-items:center;
+  position:relative; overflow:hidden;
+}
+/* soft radial bg */
+.hero::before {
+  content:''; position:absolute;
+  top:-100px; right:-100px;
+  width:600px; height:600px;
+  background:radial-gradient(circle, rgba(74,124,89,.07) 0%, transparent 70%);
+  pointer-events:none;
+}
+.eyebrow {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:28px;
+  opacity:0; animation:rise .8s .1s forwards;
+}
+.eyebrow-pip { width:6px; height:6px; background:var(--sage); border-radius:50%; }
+.eyebrow-text { font-size:11px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); }
+
+h1 {
+  font-family:'Playfair Display', serif;
+  font-size:clamp(52px, 6vw, 88px);
+  font-weight:500; line-height:1.04; letter-spacing:-.5px;
+  color:var(--charcoal); margin-bottom:24px;
+  opacity:0; animation:rise .9s .25s forwards;
+}
+h1 em { font-style:italic; color:var(--sage); font-weight:400; }
+
+.hero-body {
+  font-size:17px; font-weight:300; line-height:1.85;
+  color:var(--mid); max-width:430px; margin-bottom:44px;
+  opacity:0; animation:rise .9s .4s forwards;
+}
+.hero-actions {
+  display:flex; align-items:center; gap:20px;
+  opacity:0; animation:rise .9s .55s forwards;
+}
+.btn-primary {
+  display:inline-flex; align-items:center; gap:10px;
+  background:var(--sage); color:var(--white);
+  padding:14px 32px; font-size:12px; font-weight:500;
+  letter-spacing:.1em; text-transform:uppercase;
+  text-decoration:none; border:1px solid var(--sage);
+  transition:all .3s;
+}
+.btn-primary:hover { background:var(--sage-d); border-color:var(--sage-d); transform:translateY(-1px); box-shadow:0 8px 24px rgba(74,124,89,.2); }
+.btn-primary .arr { transition:transform .25s; }
+.btn-primary:hover .arr { transform:translateX(4px); }
+.btn-ghost {
+  font-size:12px; font-weight:400; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--mid); text-decoration:none; display:flex; align-items:center; gap:7px;
+  transition:color .2s;
+}
+.btn-ghost:hover { color:var(--sage); }
+
+.hero-stats {
+  margin-top:52px; padding-top:28px; border-top:1px solid var(--border);
+  display:flex; gap:0;
+  opacity:0; animation:rise .9s .7s forwards;
+}
+.hstat { flex:1; padding-right:28px; border-right:1px solid var(--border); margin-right:28px; }
+.hstat:last-child { border-right:none; margin-right:0; padding-right:0; }
+.hstat-val {
+  font-family:'Playfair Display', serif;
+  font-size:36px; font-weight:500; color:var(--charcoal);
+  letter-spacing:-.5px; line-height:1; margin-bottom:7px;
+}
+.hstat-label { font-size:11px; font-weight:400; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); line-height:1.5; }
+
+/* ── HERO CARD ── */
+.hero-right { opacity:0; animation:rise 1s .35s forwards; position:relative; }
+.float-tag {
+  position:absolute; top:-14px; right:24px;
+  background:var(--sage); color:var(--white);
+  padding:6px 14px; font-size:9px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase;
+  box-shadow:0 4px 16px rgba(74,124,89,.25);
+}
+.call-card {
+  background:var(--white);
+  border:1px solid var(--border);
+  box-shadow:0 20px 64px rgba(30,42,34,.08), 0 4px 12px rgba(30,42,34,.04);
+}
+.cc-bar {
+  background:var(--charcoal); padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.cc-bar-title { font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.4); }
+.cc-live { display:flex; align-items:center; gap:7px; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--sage-l); }
+.live-dot { width:6px; height:6px; background:#6dd49a; border-radius:50%; animation:breathe 1.4s infinite; }
+.cc-body { padding:22px; }
+.cc-caller {
+  display:flex; align-items:center; gap:13px;
+  padding-bottom:16px; border-bottom:1px solid var(--border); margin-bottom:16px;
+}
+.cc-avatar { width:38px; height:38px; background:var(--sage-p); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:var(--sage-d); letter-spacing:-.02em; }
+.cc-name { font-size:13px; font-weight:500; color:var(--charcoal); margin-bottom:2px; }
+.cc-sub { font-size:10px; color:var(--muted); }
+.cc-timer { margin-left:auto; font-family:'DM Mono', monospace; font-size:12px; color:var(--sage); }
+.flow-item {
+  display:flex; align-items:flex-start; gap:11px;
+  padding:11px 0; border-bottom:1px solid var(--surface);
+  opacity:0; animation:stepIn .5s ease forwards;
+}
+.flow-item:last-child { border-bottom:none; }
+.flow-item:nth-child(1) { animation-delay:1s; }
+.flow-item:nth-child(2) { animation-delay:1.7s; }
+.flow-item:nth-child(3) { animation-delay:2.4s; }
+.flow-item:nth-child(4) { animation-delay:3.1s; }
+.flow-item:nth-child(5) { animation-delay:3.8s; }
+.fi-icon { width:28px; height:28px; background:var(--surface); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600; color:var(--sage); flex-shrink:0; letter-spacing:-.02em; }
+.fi-body { flex:1; }
+.fi-label { font-size:8px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+.fi-text { font-size:12px; color:var(--charcoal); line-height:1.45; }
+.fi-tag { font-size:8px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; background:var(--sage-p); color:var(--sage); border:1px solid var(--sage-pp); align-self:center; flex-shrink:0; white-space:nowrap; }
+.fi-tag.done { background:#e6f5ec; color:#2d7a4f; border-color:rgba(45,122,79,.2); }
+.sms-block {
+  margin-top:14px; background:var(--charcoal); padding:13px 15px;
+  display:flex; gap:9px; align-items:flex-start;
+  opacity:0; animation:stepIn .5s 3.8s forwards;
+}
+.sms-label { font-size:8px; letter-spacing:.14em; text-transform:uppercase; color:var(--sage-l); margin-bottom:4px; }
+.sms-text { font-size:11px; color:rgba(255,255,255,.55); line-height:1.6; font-family:'DM Mono', monospace; font-weight:300; }
+
+/* ── PROBLEM ── */
+.problem {
+  padding:120px 64px; text-align:center;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  background:var(--white);
+}
+.problem-quote {
+  font-family:'Playfair Display', serif;
+  font-size:clamp(32px,4.5vw,60px);
+  font-weight:400; font-style:italic;
+  line-height:1.2; color:var(--charcoal);
+  max-width:780px; margin:0 auto 60px; letter-spacing:-.2px;
+}
+.problem-quote em { font-style:normal; color:var(--sage); }
+.problem-stats { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); max-width:700px; margin:0 auto; }
+.pstat { background:var(--bg); padding:40px; text-align:left; }
+.pstat-num { font-family:'Playfair Display', serif; font-size:52px; font-weight:500; color:var(--sage); letter-spacing:-1px; line-height:1; margin-bottom:12px; }
+.pstat-text { font-size:14px; font-weight:300; color:var(--mid); line-height:1.75; }
+
+/* ── RESULTS ── */
+.results { background:var(--charcoal); }
+.results-inner { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:rgba(255,255,255,.05); }
+.result-block { background:var(--charcoal); padding:68px 48px; border-right:1px solid rgba(255,255,255,.06); transition:background .3s; }
+.result-block:last-child { border-right:none; }
+.result-block:hover { background:#263330; }
+.result-num { font-family:'Playfair Display', serif; font-size:68px; font-weight:400; color:var(--sage-l); letter-spacing:-2px; line-height:1; margin-bottom:14px; }
+.result-title { font-size:15px; font-weight:500; color:rgba(255,255,255,.85); margin-bottom:10px; }
+.result-body { font-size:13px; font-weight:300; color:rgba(255,255,255,.35); line-height:1.75; }
+
+/* ── WHAT IT DOES ── */
+.what { padding:120px 64px; max-width:900px; margin:0 auto; }
+.section-eyebrow { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+.section-eyebrow .pip { width:6px; height:6px; background:var(--sage); border-radius:50%; }
+.section-eyebrow span { font-size:11px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); }
+.section-title { font-family:'Playfair Display', serif; font-size:clamp(32px,4vw,52px); font-weight:500; letter-spacing:-.3px; line-height:1.1; color:var(--charcoal); margin-bottom:44px; }
+.section-title em { font-style:italic; color:var(--sage); font-weight:400; }
+.what-points { display:flex; flex-direction:column; }
+.what-point { display:flex; align-items:flex-start; gap:18px; padding:24px 0; border-bottom:1px solid var(--border); transition:padding-left .2s; }
+.what-point:first-child { padding-top:0; }
+.what-point:last-child { border-bottom:none; }
+.what-point:hover { padding-left:6px; }
+.wp-num { font-family:'Playfair Display', serif; font-size:28px; font-weight:400; color:var(--border); line-height:1; flex-shrink:0; width:28px; transition:color .2s; }
+.what-point:hover .wp-num { color:var(--sage-l); }
+.wp-title { font-family:'Playfair Display', serif; font-size:20px; font-weight:500; color:var(--charcoal); margin-bottom:5px; letter-spacing:-.1px; }
+.wp-desc { font-size:13px; font-weight:300; color:var(--muted); line-height:1.8; }
+
+/* impact card */
+.impact-card { background:var(--white); border:1px solid var(--border); box-shadow:0 8px 40px rgba(30,42,34,.07); }
+.ic-bar { background:var(--sage); padding:16px 22px; display:flex; align-items:center; gap:10px; }
+.ic-bar-title { font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--white); }
+.ic-body { padding:28px; }
+.ic-row { padding:18px 0; border-bottom:1px solid var(--surface); display:flex; align-items:center; justify-content:space-between; }
+.ic-row:last-child { border-bottom:none; }
+.ic-label { font-size:12px; font-weight:400; color:var(--mid); }
+.ic-val { font-family:'Playfair Display', serif; font-size:26px; font-weight:500; color:var(--sage); letter-spacing:-.3px; }
+.ic-val.neutral { color:var(--charcoal); }
+
+/* ── CTA ── */
+.cta-section {
+  background:var(--sage); padding:120px 64px;
+  text-align:center; position:relative; overflow:hidden;
+}
+.cta-section::before {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(-45deg, transparent, transparent 48px, rgba(255,255,255,.025) 48px, rgba(255,255,255,.025) 49px);
+}
+.cta-eyebrow { display:inline-flex; align-items:center; gap:12px; margin-bottom:24px; position:relative; }
+.cta-eyebrow .pip { background:rgba(255,255,255,.5); }
+.cta-eyebrow span { font-size:11px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.7); }
+.cta-title { font-family:'Playfair Display', serif; font-size:clamp(38px,5.5vw,72px); font-weight:400; font-style:italic; letter-spacing:-.3px; line-height:1.08; color:var(--white); margin-bottom:18px; position:relative; }
+.cta-title strong { font-style:normal; font-weight:500; }
+.cta-sub { font-size:15px; font-weight:300; color:rgba(255,255,255,.65); max-width:420px; margin:0 auto 48px; line-height:1.85; position:relative; }
+.cta-form { display:flex; max-width:420px; margin:0 auto 14px; position:relative; }
+.cta-input {
+  flex:1; padding:15px 18px;
+  border:1px solid rgba(255,255,255,.3);
+  background:rgba(255,255,255,.12);
+  color:var(--white); font-size:13px;
+  font-family:'Plus Jakarta Sans', sans-serif; font-weight:300;
+  outline:none; transition:border-color .2s;
+}
+.cta-input::placeholder { color:rgba(255,255,255,.4); }
+.cta-input:focus { border-color:rgba(255,255,255,.7); }
+.cta-btn {
+  background:var(--white); color:var(--sage-d);
+  padding:15px 26px; font-size:12px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase;
+  border:1px solid var(--white); transition:all .25s; white-space:nowrap;
+}
+.cta-btn:hover { background:var(--charcoal); border-color:var(--charcoal); color:var(--white); }
+.cta-note { font-size:11px; color:rgba(255,255,255,.4); position:relative; }
+
+/* ── FOOTER ── */
+footer { background:var(--charcoal); border-top:1px solid rgba(255,255,255,.06); padding:64px 64px 36px; }
+.footer-top { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:48px; border-bottom:1px solid rgba(255,255,255,.07); gap:48px; }
+.footer-logo { font-family:'Playfair Display', serif; font-size:22px; font-weight:500; color:var(--white); text-decoration:none; display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.footer-logo .l4-text { color:var(--white); }
+.footer-logo .l4-text span { color:var(--sage-l); }
+.footer-logo .l4-mark svg path { stroke:#7aab89; }
+.footer-logo .l4-mark svg path:first-child { stroke:#7aab89; }
+.footer-logo .l4-mark svg circle { fill:#7aab89; }
+.footer-tagline { font-size:12px; font-weight:300; color:rgba(255,255,255,.3); max-width:200px; line-height:1.7; }
+.footer-col-title { font-size:9px; font-weight:500; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-bottom:18px; }
+.footer-links { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.footer-links a { font-size:13px; font-weight:300; color:rgba(255,255,255,.45); text-decoration:none; transition:color .2s; }
+.footer-links a:hover { color:var(--sage-l); }
+.footer-bottom { padding-top:24px; display:flex; justify-content:space-between; align-items:center; }
+.footer-copy { font-size:11px; color:rgba(255,255,255,.18); }
+.footer-legal { display:flex; gap:20px; }
+.footer-legal a { font-size:11px; color:rgba(255,255,255,.18); text-decoration:none; transition:color .2s; }
+.footer-legal a:hover { color:rgba(255,255,255,.45); }
+
+/* ── REVEAL ── */
+.reveal { opacity:1; transform:translateY(0); transition:opacity .75s ease, transform .75s ease; }
+.reveal.animate { opacity:0; transform:translateY(24px); }
+.reveal.animate.visible { opacity:1; transform:translateY(0); }
+
+/* ── KEYFRAMES ── */
+@keyframes rise { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+@keyframes stepIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
+@keyframes breathe { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.8); } }
+
+/* ── RESPONSIVE ── */
+/* ── ROADMAP ── */
+.roadmap { background:var(--white); padding:120px 64px; border-top:1px solid var(--border); }
+.roadmap-inner { max-width:1100px; margin:0 auto; }
+.roadmap-intro { font-size:16px; font-weight:300; color:var(--mid); line-height:1.85; max-width:520px; margin-bottom:64px; }
+.roadmap-grid {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:1px; background:var(--border);
+  border:1px solid var(--border);
+}
+.rm-card {
+  padding:32px 28px; background:var(--bg);
+  position:relative; transition:background .25s;
+}
+.rm-card:hover { background:var(--white); }
+.rm-badge {
+  display:inline-block; font-size:8px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase;
+  padding:4px 10px; margin-bottom:20px;
+}
+.rm-badge-live { background:var(--sage-p); color:var(--sage-d); border:1px solid var(--sage-pp); }
+.rm-badge-soon { background:#fff8e6; color:#a07820; border:1px solid #f0d98a; }
+.rm-badge-future { background:var(--surface); color:var(--muted); border:1px solid var(--border); }
+.rm-icon { font-size:22px; margin-bottom:14px; }
+.rm-title { font-family:'Playfair Display', serif; font-size:16px; font-weight:500; color:var(--charcoal); margin-bottom:10px; letter-spacing:-.1px; }
+.rm-desc { font-size:12px; font-weight:300; color:var(--muted); line-height:1.8; }
+.rm-live { background:var(--white); }
+.roadmap-grid .reveal:nth-child(1) { transition-delay: 0s; }
+.roadmap-grid .reveal:nth-child(2) { transition-delay: 0.08s; }
+.roadmap-grid .reveal:nth-child(3) { transition-delay: 0.16s; }
+.roadmap-grid .reveal:nth-child(4) { transition-delay: 0.24s; }
+.roadmap-grid .reveal:nth-child(5) { transition-delay: 0s; }
+.roadmap-grid .reveal:nth-child(6) { transition-delay: 0.08s; }
+.roadmap-grid .reveal:nth-child(7) { transition-delay: 0.16s; }
+.roadmap-grid .reveal:nth-child(8) { transition-delay: 0.24s; }
+
+
+@media(max-width:1024px) {
+  .roadmap { padding:80px 28px; }
+  .roadmap-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:600px) {
+  .roadmap-grid { grid-template-columns:1fr; }
+}
+
+@media(max-width:1024px) {
+  nav { padding:0 28px; }
+  .nav-links { display:none; }
+  .hero { grid-template-columns:1fr; padding:100px 28px 60px; gap:48px; }
+  .hero::before { display:none; }
+  .problem, .what, .cta-section { padding:80px 28px; }
+  .what { padding:80px 28px; }
+  .results-inner { grid-template-columns:1fr; }
+  .result-block { border-right:none; border-bottom:1px solid rgba(255,255,255,.06); padding:52px 36px; }
+  .problem-stats { grid-template-columns:1fr; }
+  footer { padding:52px 28px 28px; }
+  .footer-top { flex-wrap:wrap; }
+  .hero-stats { flex-direction:column; gap:20px; }
+  .hstat { border-right:none; padding-right:0; margin-right:0; border-bottom:1px solid var(--border); padding-bottom:20px; }
+  .hstat:last-child { border-bottom:none; padding-bottom:0; }
+  .footer-bottom { flex-direction:column; gap:12px; text-align:center; }
+}
+@media(max-width:600px) {
+  .cta-form { flex-direction:column; }
+  h1 { font-size:48px; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="l4-mark">
+      <svg viewBox="0 0 44 44" fill="none">
+        <path d="M8 22 Q14 10 22 22 Q30 34 36 22" stroke="#4a7c59" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M4 22 Q11 6 22 22 Q33 38 40 22" stroke="#7aab89" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".5"/>
+        <circle cx="22" cy="22" r="2.5" fill="#4a7c59"/>
+      </svg>
+    </div>
+    <div class="l4-text">Clari<span>va</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#what">Product</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#demo">Demo</a></li>
+  </ul>
+  <a href="#demo" class="nav-cta">Request a Demo</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="eyebrow">
+      <div class="eyebrow-pip"></div>
+      <span class="eyebrow-text">AI Care Coordinator</span>
+    </div>
+    <h1>Your clinic,<br><em>always</em><br>answered.</h1>
+    <p class="hero-body">Clariva is the AI patient communication platform for medical and dental practices — answering every call, booking appointments, sending reminders, and following up with patients. Automatically. Around the clock.</p>
+    <div class="hero-actions">
+      <a href="#demo" class="btn-primary">Request a Demo <span class="arr">→</span></a>
+      <a href="#what" class="btn-ghost">See the product</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat">
+        <div class="hstat-val">24/7</div>
+        <div class="hstat-label">Always<br>available</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val">&lt;3s</div>
+        <div class="hstat-label">Call answer<br>time</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val">40%</div>
+        <div class="hstat-label">Fewer<br>no-shows</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="float-tag">Processing Now</div>
+    <div class="call-card">
+      <div class="cc-bar">
+        <span class="cc-bar-title">Clariva · Live Call</span>
+        <div class="cc-live"><div class="live-dot"></div> Active</div>
+      </div>
+      <div class="cc-body">
+        <div class="cc-caller">
+          <div class="cc-avatar">SM</div>
+          <div>
+            <div class="cc-name">Sarah Mitchell</div>
+            <div class="cc-sub">Inbound · General Enquiry</div>
+          </div>
+          <div class="cc-timer" id="timer">0:47</div>
+        </div>
+        <div>
+          <div class="flow-item">
+            <div class="fi-icon">P</div>
+            <div class="fi-body">
+              <div class="fi-label">Patient</div>
+              <div class="fi-text">"I need an appointment for next Tuesday"</div>
+            </div>
+          </div>
+          <div class="flow-item">
+            <div class="fi-icon">CC</div>
+            <div class="fi-body">
+              <div class="fi-label">Care Coordinator</div>
+              <div class="fi-text">"I'd be happy to help you schedule that. Let me check our availability for Tuesday."</div>
+            </div>
+          </div>
+          <div class="flow-item">
+            <div class="fi-icon">SY</div>
+            <div class="fi-body">
+              <div class="fi-label">System Check</div>
+              <div class="fi-text">Availability verified · Dr. Patel · Tuesday 10:00am</div>
+            </div>
+            <div class="fi-tag">Available</div>
+          </div>
+          <div class="flow-item">
+            <div class="fi-icon">CC</div>
+            <div class="fi-body">
+              <div class="fi-label">Care Coordinator</div>
+              <div class="fi-text">"Perfect. I have Dr. Patel available at 10:00am. Would that work for you?"</div>
+            </div>
+          </div>
+          <div class="flow-item">
+            <div class="fi-icon">BK</div>
+            <div class="fi-body">
+              <div class="fi-label">Booking Confirmed</div>
+              <div class="fi-text">Appointment scheduled · Calendar updated · Confirmation sent</div>
+            </div>
+            <div class="fi-tag done">Confirmed</div>
+          </div>
+        </div>
+        <div class="sms-block">
+          <div>
+            <div class="sms-label">SMS Confirmation Sent</div>
+            <div class="sms-text">Hi Sarah, your appointment with Dr. Patel is confirmed for Tue 14 Jan at 10:00am. — Clariva</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem reveal">
+  <p class="problem-quote">"Every missed call is a<br><em>missed patient.</em><br>Most clinics miss dozens every week."</p>
+  <div class="problem-stats">
+    <div class="pstat">
+      <div class="pstat-num">67%</div>
+      <div class="pstat-text">of patients hang up if not answered within 3 rings — and most never call back.</div>
+    </div>
+    <div class="pstat">
+      <div class="pstat-num">1 in 4</div>
+      <div class="pstat-text">patients switch providers after a single poor call experience.</div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results" id="results">
+  <div class="results-inner">
+    <div class="result-block reveal">
+      <div class="result-num">3×</div>
+      <div class="result-title">More appointments captured</div>
+      <div class="result-body">After-hours and overflow calls that used to go to voicemail now convert into booked appointments.</div>
+    </div>
+    <div class="result-block reveal">
+      <div class="result-num">↓ 0</div>
+      <div class="result-title">Missed calls after hours</div>
+      <div class="result-body">Every night, every weekend, every public holiday — covered.</div>
+    </div>
+    <div class="result-block reveal">
+      <div class="result-num">40%</div>
+      <div class="result-title">Fewer no-shows</div>
+      <div class="result-body">Automated reminders and confirmations keep your schedule full and your revenue predictable.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT DOES -->
+<section class="what" id="what">
+  <div class="reveal">
+    <div class="section-eyebrow"><div class="pip"></div><span>The Product</span></div>
+    <h2 class="section-title">Every patient interaction,<br><em>handled.</em></h2>
+    <div class="what-points">
+      <div class="what-point">
+        <div class="wp-num">01</div>
+        <div>
+          <div class="wp-title">Answers every call instantly</div>
+          <div class="wp-desc">No hold music. No voicemail. Every patient greeted within seconds, day or night — 24/7/365.</div>
+        </div>
+      </div>
+      <div class="what-point">
+        <div class="wp-num">02</div>
+        <div>
+          <div class="wp-title">Books directly to your calendar</div>
+          <div class="wp-desc">Checks real-time availability and confirms the appointment on the call — no human step, no callback required.</div>
+        </div>
+      </div>
+      <div class="what-point">
+        <div class="wp-num">03</div>
+        <div>
+          <div class="wp-title">Sends reminders automatically</div>
+          <div class="wp-desc">Outbound reminder calls and SMS at 48 hours and 2 hours before every appointment. Patients confirm, reschedule, or cancel — your calendar updates itself.</div>
+        </div>
+      </div>
+      <div class="what-point">
+        <div class="wp-num">04</div>
+        <div>
+          <div class="wp-title">Triages urgency in real time</div>
+          <div class="wp-desc">Clariva detects urgent language and clinical emergencies — immediately alerting your on-call team or routing to emergency services. It knows exactly when to hand over.</div>
+        </div>
+      </div>
+      <div class="what-point">
+        <div class="wp-num">05</div>
+        <div>
+          <div class="wp-title">Answers every FAQ flawlessly</div>
+          <div class="wp-desc">Hours, directions, insurance accepted, services offered, parking — trained on your specific practice so patients always get the right answer.</div>
+        </div>
+      </div>
+      <div class="what-point">
+        <div class="wp-num">06</div>
+        <div>
+          <div class="wp-title">Gives you complete visibility</div>
+          <div class="wp-desc">Every call logged, transcribed, and summarised. See what patients are asking, when they call, and how many appointments Clariva captured — all in one dashboard.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP TEASER -->
+<section class="roadmap" id="roadmap">
+  <div class="roadmap-inner">
+    <div class="reveal">
+      <div class="section-eyebrow"><div class="pip"></div><span>What's Coming</span></div>
+      <h2 class="section-title" style="max-width:600px;">Built for today.<br><em>Designed for what's next.</em></h2>
+      <p class="roadmap-intro">Clariva starts with your calls. This is where we're going.</p>
+    </div>
+    <div class="roadmap-grid">
+
+      <div class="rm-card rm-live reveal">
+        <div class="rm-badge rm-badge-live">Available Now</div>
+        <div class="rm-icon">📞</div>
+        <div class="rm-title">AI Call Answering</div>
+      </div>
+
+      <div class="rm-card rm-live reveal">
+        <div class="rm-badge rm-badge-live">Available Now</div>
+        <div class="rm-icon">🔔</div>
+        <div class="rm-title">Appointment Reminders</div>
+      </div>
+
+      <div class="rm-card rm-soon reveal">
+        <div class="rm-badge rm-badge-soon">Coming Soon</div>
+        <div class="rm-icon">🏥</div>
+        <div class="rm-title">EHR Integration</div>
+      </div>
+
+      <div class="rm-card rm-soon reveal">
+        <div class="rm-badge rm-badge-soon">Coming Soon</div>
+        <div class="rm-icon">🛡️</div>
+        <div class="rm-title">Insurance Verification</div>
+      </div>
+
+      <div class="rm-card rm-soon reveal">
+        <div class="rm-badge rm-badge-soon">Coming Soon</div>
+        <div class="rm-icon">💬</div>
+        <div class="rm-title">SMS & Chat</div>
+      </div>
+
+      <div class="rm-card rm-soon reveal">
+        <div class="rm-badge rm-badge-soon">Coming Soon</div>
+        <div class="rm-icon">📊</div>
+        <div class="rm-title">Patient Recall Campaigns</div>
+      </div>
+
+      <div class="rm-card rm-future reveal">
+        <div class="rm-badge rm-badge-future">On the Horizon</div>
+        <div class="rm-icon">⭐</div>
+        <div class="rm-title">Post-Visit Follow Up</div>
+      </div>
+
+      <div class="rm-card rm-future reveal">
+        <div class="rm-badge rm-badge-future">On the Horizon</div>
+        <div class="rm-icon">🌐</div>
+        <div class="rm-title">Multilingual Support</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="demo">
+  <div class="cta-eyebrow reveal">
+    <div class="pip"></div>
+    <span>Live Demo</span>
+  </div>
+  <h2 class="cta-title reveal">Hear Clariva answer<br><strong>a real patient call.</strong></h2>
+  <p class="cta-sub reveal">20 minutes. We call your number live. You see exactly what your patients will experience.</p>
+  <div class="cta-form reveal">
+    <input class="cta-input" id="emailInput" type="email" placeholder="your@clinic.com">
+    <button class="cta-btn" id="ctaBtn">Book My Demo</button>
+  </div>
+  <p class="cta-note reveal">No contract. No setup fee. Cancel anytime.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <a href="#" class="footer-logo">
+        <div class="l4-mark">
+          <svg viewBox="0 0 44 44" fill="none">
+            <path d="M8 22 Q14 10 22 22 Q30 34 36 22" stroke="#7aab89" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <path d="M4 22 Q11 6 22 22 Q33 38 40 22" stroke="#7aab89" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".5"/>
+            <circle cx="22" cy="22" r="2.5" fill="#7aab89"/>
+          </svg>
+        </div>
+        <div class="l4-text">Clari<span>va</span></div>
+      </a>
+      <p class="footer-tagline">The AI patient communication platform for modern healthcare.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="#what">What it does</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#demo">Book a Demo</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Contact</div>
+      <ul class="footer-links">
+        <li><a href="/cdn-cgi/l/email-protection#aac2cfc6c6c5eac9c6cbd8c3dccb84cbc3"><span class="__cf_email__" data-cfemail="ea828f868685aa89868b98839c8bc48b83">[email&#160;protected]</span></a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Twitter / X</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 Clariva Technologies. All rights reserved.</span>
+    <div class="footer-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms</a>
+      <a href="#">HIPAA</a>
+    </div>
+  </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Cursor
+const cur=document.getElementById('cursor'),ring=document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(2)';ring.style.opacity='1';ring.style.transform='translate(-50%,-50%) scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='.6';ring.style.transform='translate(-50%,-50%) scale(1)';});
+});
+
+// Scroll reveal
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(r=>{r.classList.add('animate');obs.observe(r);});
+document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
+
+// Timer
+let s=47;
+setInterval(()=>{s++;const m=Math.floor(s/60),sec=s%60;document.getElementById('timer').textContent=m+':'+(sec<10?'0':'')+sec;},1000);
+
+// Smooth scroll for all anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// CTA Form Submission
+document.getElementById('ctaBtn').addEventListener('click',()=>{
+  const inp=document.getElementById('emailInput');
+  const email = inp.value.trim();
+  
+  // Gmail validation regex
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+  
+  if (!email) {
+    alert('Please enter your email address');
+    inp.focus();
+    return;
+  }
+  
+  if (!gmailRegex.test(email)) {
+    alert('Please enter a valid Gmail address (e.g., yourname@gmail.com)');
+    inp.focus();
+    return;
+  }
+  
+  // Send email to you via mailto (opens email client)
+  const subject = encodeURIComponent('New Demo Request from Clariva Website');
+  const body = encodeURIComponent(`New demo request received!\n\nEmail: ${email}\n\nRequested on: ${new Date().toLocaleString()}\n\nPlease follow up within 24 hours.`);
+  window.location.href = `mailto:your-email@example.com?subject=${subject}&body=${body}`;
+  
+  // Update UI
+  const btn=document.getElementById('ctaBtn');
+  btn.textContent="Request Received";
+  btn.style.cssText='background:#2d7a4f;border-color:#2d7a4f;color:white;padding:15px 26px;font-size:12px;letter-spacing:.1em;';
+  inp.value='';
+  setTimeout(() => {
+    inp.placeholder = "We'll contact you within 24 hours";
+  }, 300);
+});
