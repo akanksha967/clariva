@@ -1,41 +1,21 @@
 import emailjs from 'https://esm.sh/@emailjs/browser@4.4.1';
-import { startCall } from './vapi.js';
 
 /** Where your team receives new demo leads (must match the “To” field in EmailJS team template). */
 const TEAM_INBOX = 'hello@clariva.ai';
 
 /**
- * EmailJS — https://www.emailjs.com/ (free tier works for low volume).
+ * EmailJS — https://www.emailjs.com/
  *
- * 1. Create account → Email Services → connect Gmail or SMTP.
- * 2. Create two Email Templates:
+ * Team template: To = fixed inbox. Visitor template: To = {{user_email}}
+ * Variables sent: user_email, clinic_name, reply_to (team only), team_email (team only)
  *
- *    Template A — “team” (to you):
- *      To email: hello@clariva.ai (fixed in template UI)
- *      Subject: New Clariva demo — {{clinic_name}}
- *      Content example:
- *        New demo request.
- *        Practice: {{clinic_name}}
- *        Contact email: {{user_email}}
- *      Reply-To: use {{reply_to}} if your provider supports it in advanced settings.
- *
- *    Template B — “visitor” (confirmation to them):
- *      To email: {{user_email}}  ← set “To” in template to this variable
- *      Subject: We received your Clariva demo request
- *      Content example:
- *        Hi,
- *        Thanks for your interest in Clariva. Someone from our team will reach out soon at this address.
- *        Practice you entered: {{clinic_name}}
- *        — Clariva
- *
- * 3. Copy Public Key, Service ID, and both Template IDs below.
- * 4. In EmailJS → Account → Security, restrict requests to your site’s domain.
+ * Account → Security: allow your domain (and http://localhost for local testing).
  */
 const EMAILJS = {
-  publicKey: '',
-  serviceId: '',
-  templateTeam: '',
-  templateVisitor: '',
+  publicKey: '7Tyhp7REciU6WR6Gf',
+  serviceId: 'service_7junsyc',
+  templateTeam: 'template_hru8of6',
+  templateVisitor: 'template_q6w3tid',
 };
 
 function isEmailJsConfigured() {
@@ -51,11 +31,6 @@ function isEmailJsConfigured() {
  * Sends (1) notification to TEAM_INBOX and (2) confirmation to the visitor.
  */
 async function sendLeadEmails(userEmail, clinicName) {
-  if (!isEmailJsConfigured()) {
-    console.warn('[Clariva] EmailJS is not configured — no emails sent. Edit js/form.js (EMAILJS).');
-    return;
-  }
-
   await emailjs.send(
     EMAILJS.serviceId,
     EMAILJS.templateTeam,
@@ -64,8 +39,7 @@ async function sendLeadEmails(userEmail, clinicName) {
       user_email: userEmail,
       clinic_name: clinicName,
       reply_to: userEmail,
-    },
-    { publicKey: EMAILJS.publicKey }
+    }
   );
 
   await emailjs.send(
@@ -74,30 +48,24 @@ async function sendLeadEmails(userEmail, clinicName) {
     {
       user_email: userEmail,
       clinic_name: clinicName,
-    },
-    { publicKey: EMAILJS.publicKey }
+    }
   );
 }
 
-/**
- * Validates that the supplied string is a well-formed email address.
- */
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/**
- * Updates the CTA button after a successful book + optional email send.
- */
-function showBookDemoSuccess(btn) {
+function showBookDemoSuccess(btn, originalLabel) {
   btn.textContent = 'Thanks — check your email';
   btn.style.cssText =
     'background:#2d7a4f;border-color:#2d7a4f;color:white;cursor:default;' +
     'padding:15px 26px;font-size:12px;letter-spacing:.1em;';
 
   setTimeout(() => {
-    btn.textContent = 'Voice demo started';
-  }, 3500);
+    btn.textContent = originalLabel;
+    btn.style.cssText = '';
+  }, 5000);
 }
 
 function trackDemoRequest(email, clinic) {
@@ -111,12 +79,18 @@ export function initForm() {
 
   if (!btn || !emailInput) return;
 
+  const defaultBtnLabel = btn.textContent;
+
+  if (isEmailJsConfigured()) {
+    emailjs.init({ publicKey: EMAILJS.publicKey });
+  }
+
   btn.addEventListener('click', async () => {
     const email = emailInput.value.trim();
     const clinic = clinicInput ? clinicInput.value.trim() : '';
 
     if (!clinic) {
-      alert('Please enter your clinic name.');
+      alert('Please enter your practice name.');
       if (clinicInput) clinicInput.focus();
       return;
     }
@@ -133,29 +107,32 @@ export function initForm() {
       return;
     }
 
-    const prevText = btn.textContent;
+    if (!isEmailJsConfigured()) {
+      alert(
+        'Email booking is not configured. Contact us at ' +
+          TEAM_INBOX +
+          ' or use the voice demo button above.'
+      );
+      return;
+    }
+
     btn.disabled = true;
+    btn.textContent = 'Sending…';
 
     try {
-      if (isEmailJsConfigured()) {
-        btn.textContent = 'Sending…';
-        await sendLeadEmails(email, clinic);
-      }
-
-      console.log(`[Clariva] Starting dynamic demo for: ${clinic}`);
-      startCall(clinic);
+      await sendLeadEmails(email, clinic);
       trackDemoRequest(email, clinic);
-      showBookDemoSuccess(btn);
+      showBookDemoSuccess(btn, defaultBtnLabel);
     } catch (err) {
-      console.error('[Clariva] Book demo failed:', err);
+      console.error('[Clariva] Book demo email failed:', err);
+      const detail = err?.text || err?.message || String(err);
       alert(
-        'We could not send the confirmation emails. You can still try the voice demo, or write us at ' +
+        'We could not send the emails. Please try again or write to ' +
           TEAM_INBOX +
-          '.'
+          '.\n\nIf you are testing locally, add http://127.0.0.1 and http://localhost under EmailJS → Account → Security → Allowed domains.\n\n' +
+          (detail ? `Details: ${detail}` : '')
       );
-      startCall(clinic);
-      trackDemoRequest(email, clinic);
-      btn.textContent = prevText;
+      btn.textContent = defaultBtnLabel;
     } finally {
       btn.disabled = false;
     }
