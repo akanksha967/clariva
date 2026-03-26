@@ -172,17 +172,8 @@ export function initForm() {
       trackDemoRequest(email, clinic);
       showBookDemoSuccess(btn, defaultBtnLabel);
     } catch (err) {
-      console.error('[Clariva] Book demo email failed:', err);
       const detail = err instanceof Error ? err.message : formatEmailJsError(err);
-      alert(
-        'We could not send the emails. Please try again or write to ' +
-          TEAM_INBOX +
-          '.\n\n' +
-          'Checks: (1) EmailJS → Account → Security → Allowed domains must include this site’s origin (e.g. http://localhost:5500 if you use Live Server). ' +
-          '(2) Visitor template → “To email” must be {{user_email}} or {{to_email}} (not blank). (3) Email service must be connected (try Custom SMTP if Gmail API fails). ' +
-          '(4) Spam folder.\n\n' +
-          (detail ? `Error: ${detail}` : '')
-      );
+      console.error('[Clariva] Book demo email failed:', detail, err);
       btn.textContent = defaultBtnLabel;
     } finally {
       btn.disabled = false;
