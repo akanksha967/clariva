@@ -6,8 +6,10 @@ const TEAM_INBOX = 'hello@clariva.ai';
 /**
  * EmailJS — https://www.emailjs.com/
  *
- * Team template: To = fixed inbox. Visitor template: To = {{user_email}}
- * Variables sent: user_email, clinic_name, reply_to (team only), team_email (team only)
+ * Team template: To = fixed inbox (e.g. hello@clariva.ai).
+ * Visitor template: the “To email” field MUST be a variable, e.g. {{user_email}} or {{to_email}}
+ *   (if it is blank or static, EmailJS returns 422 “recipients address is empty”).
+ * Variables sent: user_email, to_email, email (same value), clinic_name, …
  *
  * Account → Security: allow your domain (and http://localhost for local testing).
  */
@@ -61,6 +63,8 @@ async function sendLeadEmails(userEmail, clinicName) {
   };
   const visitorParams = {
     user_email: userEmail,
+    to_email: userEmail,
+    email: userEmail,
     clinic_name: clinicName,
   };
 
@@ -168,17 +172,8 @@ export function initForm() {
       trackDemoRequest(email, clinic);
       showBookDemoSuccess(btn, defaultBtnLabel);
     } catch (err) {
-      console.error('[Clariva] Book demo email failed:', err);
       const detail = err instanceof Error ? err.message : formatEmailJsError(err);
-      alert(
-        'We could not send the emails. Please try again or write to ' +
-          TEAM_INBOX +
-          '.\n\n' +
-          'Checks: (1) EmailJS → Account → Security → Allowed domains must include this site’s origin (e.g. http://localhost:5500 if you use Live Server). ' +
-          '(2) Visitor template “To” must be {{user_email}}. (3) Email service must be connected (try Custom SMTP if Gmail API fails). ' +
-          '(4) Spam folder.\n\n' +
-          (detail ? `Error: ${detail}` : '')
-      );
+      console.error('[Clariva] Book demo email failed:', detail, err);
       btn.textContent = defaultBtnLabel;
     } finally {
       btn.disabled = false;
