@@ -187,8 +187,10 @@ export function initVapi() {
     setTimeout(() => setState('idle'), 3000);
   });
 
-  // ── Button click handler ────────────────────────────────────────────────────
-  btn.addEventListener('click', () => {
+  // ── Voice demo only (Book My Demo is handled in form.js — never calls startCall) ──
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (isCallActive) {
       stopCall();
     } else {

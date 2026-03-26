@@ -27,29 +27,68 @@ function isEmailJsConfigured() {
   );
 }
 
+/** Pass on every send — works even if init() runs late or fails silently. */
+function emailJsOptions() {
+  return { publicKey: EMAILJS.publicKey };
+}
+
+/**
+ * EmailJS errors are often `{ status, text }`. Surfaces the real API message in the console.
+ */
+function formatEmailJsError(err) {
+  if (err == null) return 'Unknown error';
+  if (typeof err === 'string') return err;
+  const text = err.text ?? err.message;
+  const status = err.status != null ? ` [${err.status}]` : '';
+  if (text) return `${text}${status}`;
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
+  }
+}
+
 /**
  * Sends (1) notification to TEAM_INBOX and (2) confirmation to the visitor.
  */
 async function sendLeadEmails(userEmail, clinicName) {
-  await emailjs.send(
-    EMAILJS.serviceId,
-    EMAILJS.templateTeam,
-    {
-      team_email: TEAM_INBOX,
-      user_email: userEmail,
-      clinic_name: clinicName,
-      reply_to: userEmail,
-    }
-  );
+  const opts = emailJsOptions();
+  const teamParams = {
+    team_email: TEAM_INBOX,
+    user_email: userEmail,
+    clinic_name: clinicName,
+    reply_to: userEmail,
+  };
+  const visitorParams = {
+    user_email: userEmail,
+    clinic_name: clinicName,
+  };
 
-  await emailjs.send(
-    EMAILJS.serviceId,
-    EMAILJS.templateVisitor,
-    {
-      user_email: userEmail,
-      clinic_name: clinicName,
-    }
-  );
+  try {
+    const r1 = await emailjs.send(
+      EMAILJS.serviceId,
+      EMAILJS.templateTeam,
+      teamParams,
+      opts
+    );
+    console.log('[Clariva] EmailJS team template OK:', r1);
+  } catch (err) {
+    console.error('[Clariva] EmailJS team template failed:', err);
+    throw new Error(`Team notification: ${formatEmailJsError(err)}`);
+  }
+
+  try {
+    const r2 = await emailjs.send(
+      EMAILJS.serviceId,
+      EMAILJS.templateVisitor,
+      visitorParams,
+      opts
+    );
+    console.log('[Clariva] EmailJS visitor template OK:', r2);
+  } catch (err) {
+    console.error('[Clariva] EmailJS visitor template failed:', err);
+    throw new Error(`Visitor confirmation: ${formatEmailJsError(err)}`);
+  }
 }
 
 function isValidEmail(email) {
@@ -73,11 +112,12 @@ function trackDemoRequest(email, clinic) {
 }
 
 export function initForm() {
+  const form = document.getElementById('bookDemoForm');
   const btn = document.getElementById('ctaBtn');
   const emailInput = document.getElementById('emailInput');
   const clinicInput = document.getElementById('clinicInput');
 
-  if (!btn || !emailInput) return;
+  if (!form || !btn || !emailInput) return;
 
   const defaultBtnLabel = btn.textContent;
 
@@ -85,7 +125,11 @@ export function initForm() {
     emailjs.init({ publicKey: EMAILJS.publicKey });
   }
 
-  btn.addEventListener('click', async () => {
+  /** Email booking only — never starts the Vapi voice demo (that is `#vapiDemoBtn` in vapi.js). */
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     const email = emailInput.value.trim();
     const clinic = clinicInput ? clinicInput.value.trim() : '';
 
@@ -125,12 +169,15 @@ export function initForm() {
       showBookDemoSuccess(btn, defaultBtnLabel);
     } catch (err) {
       console.error('[Clariva] Book demo email failed:', err);
-      const detail = err?.text || err?.message || String(err);
+      const detail = err instanceof Error ? err.message : formatEmailJsError(err);
       alert(
         'We could not send the emails. Please try again or write to ' +
           TEAM_INBOX +
-          '.\n\nIf you are testing locally, add http://127.0.0.1 and http://localhost under EmailJS → Account → Security → Allowed domains.\n\n' +
-          (detail ? `Details: ${detail}` : '')
+          '.\n\n' +
+          'Checks: (1) EmailJS → Account → Security → Allowed domains must include this site’s origin (e.g. http://localhost:5500 if you use Live Server). ' +
+          '(2) Visitor template “To” must be {{user_email}}. (3) Email service must be connected (try Custom SMTP if Gmail API fails). ' +
+          '(4) Spam folder.\n\n' +
+          (detail ? `Error: ${detail}` : '')
       );
       btn.textContent = defaultBtnLabel;
     } finally {
