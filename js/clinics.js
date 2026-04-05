@@ -7,7 +7,13 @@
  * falling back to the default.
  *
  * To onboard a new clinic: add an entry here. No new Vapi assistant needed.
+ *
+ * calcom_url — public Cal.com booking link for this practice (create events at cal.com).
+ * Falls back to DEFAULT_CALCOM_URL if omitted.
  */
+
+/** Used when a clinic has no calcom_url or for unknown practice names. Replace with your team link. */
+export const DEFAULT_CALCOM_URL = 'https://cal.com/clariva/demo';
 
 export const clinics = {
 
@@ -19,6 +25,7 @@ export const clinics = {
     close_time:       '17:00',
     emergency_number: '911',
     callback_time:    'tomorrow morning',
+    calcom_url:       'https://cal.com/clariva/green-valley',
   },
 
   clinic_002: {
@@ -29,6 +36,7 @@ export const clinics = {
     close_time:       '18:00',
     emergency_number: '911',
     callback_time:    'tomorrow morning',
+    calcom_url:       'https://cal.com/clariva/sunrise',
   },
 
   clinic_003: {
@@ -39,6 +47,7 @@ export const clinics = {
     close_time:       '17:30',
     emergency_number: '999',
     callback_time:    'the next business day',
+    calcom_url:       'https://cal.com/clariva/demo',
   },
 
 };
@@ -70,4 +79,25 @@ export function resolveClinic() {
 
   // 3. Default
   return clinics[DEFAULT_CLINIC_ID];
+}
+
+/**
+ * Cal.com link for emails and Vapi. If the visitor typed a practice name that matches a
+ * registry clinic_name, uses that clinic’s calcom_url; otherwise uses ?clinic= / subdomain / default.
+ */
+export function resolveBookingUrl(typedPracticeName) {
+  const trimmed = (typedPracticeName || '').trim();
+  if (trimmed) {
+    const match = Object.values(clinics).find(
+      (c) => c.clinic_name.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (match?.calcom_url) return match.calcom_url;
+  }
+  const resolved = resolveClinic();
+  return resolved.calcom_url || DEFAULT_CALCOM_URL;
+}
+
+/** Cal.com link for the current page (?clinic= / subdomain), for the static “Schedule” link. */
+export function resolveBookingUrlForPage() {
+  return resolveClinic().calcom_url || DEFAULT_CALCOM_URL;
 }
