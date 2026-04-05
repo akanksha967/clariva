@@ -6,11 +6,12 @@
  * (name, hours, emergency number, greeting) is injected at call-start
  * via assistantOverrides.variableValues so the Vapi assistant prompt can
  * reference {{clinic_name}}, {{open_time}}, {{callback_time}}, {{emergency_number}},
- * {{greeting_message}}, and {{clinic_open}} as template variables.
+ * {{greeting_message}}, {{clinic_open}}, and {{booking_url}} (Cal.com) as template variables.
  */
 
 import Vapi from 'https://esm.sh/@vapi-ai/web@2.5.2';
-import { resolveClinic } from './clinics.js';
+import { resolveClinic, resolveBookingUrl } from './clinics.js';
+import { getApiBase } from './config.js';
 
 // ── Vapi credentials ─────────────────────────────────────────────────────────
 const PUBLIC_KEY = '411e90c6-1592-4c89-ae98-8db5670506e3';
@@ -57,6 +58,27 @@ function generateGreeting(config) {
 let vapiInstance = null;
 let activeClinicConfig = null;
 let isCallActive = false;
+/** @type {{ role: string, text: string }[]} */
+let transcriptBuffer = [];
+let callStartedAt = null;
+
+async function postToApi(path, body) {
+  const base = getApiBase();
+  if (!base) return;
+  try {
+    const res = await fetch(`${base}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      console.warn('[Clariva] API', path, res.status, t);
+    }
+  } catch (e) {
+    console.warn('[Clariva] API', path, e);
+  }
+}
 
 /**
  * Builds the assistantOverrides payload injected into every call.
@@ -71,6 +93,7 @@ function buildAssistantOverrides(config) {
       emergency_number: config.emergency_number,
       greeting_message: generateGreeting(config),
       clinic_open: isClinicOpen(config) ? 'yes' : 'no',
+      booking_url: resolveBookingUrl(config.clinic_name),
     },
     maxDurationSeconds: 120,
   };
@@ -119,8 +142,7 @@ function handleCallbackRequest(data, clinicConfig) {
     createdAt: new Date().toISOString(),
   };
   console.log('[Clariva] Callback request received:', callbackRequest);
-  // TODO: POST callbackRequest to your backend endpoint, e.g.:
-  // fetch('/api/callbacks', { method: 'POST', body: JSON.stringify(callbackRequest) });
+  postToApi('/api/callbacks', callbackRequest);
 }
 
 // ── Main init ─────────────────────────────────────────────────────────────────
@@ -150,12 +172,30 @@ export function initVapi() {
   // ── Vapi event listeners ────────────────────────────────────────────────────
   vapiInstance.on('call-start', () => {
     isCallActive = true;
+    transcriptBuffer = [];
+    callStartedAt = Date.now();
     setState('active');
     console.log('[Clariva] Call started');
   });
 
   vapiInstance.on('call-end', () => {
+    const durationSeconds =
+      callStartedAt != null ? Math.max(0, Math.round((Date.now() - callStartedAt) / 1000)) : null;
+    const transcript =
+      transcriptBuffer.length > 0
+        ? transcriptBuffer.map((l) => `${l.role}: ${l.text}`).join('\n')
+        : null;
+    postToApi('/api/call-logs', {
+      clinicId: activeClinicConfig?.clinicId,
+      clinicName: activeClinicConfig?.clinic_name,
+      durationSeconds,
+      status: 'completed',
+      transcript,
+      endedAt: new Date().toISOString(),
+    });
     isCallActive = false;
+    callStartedAt = null;
+    transcriptBuffer = [];
     setState('idle');
     console.log('[Clariva] Call ended');
   });
@@ -169,8 +209,12 @@ export function initVapi() {
   });
 
   vapiInstance.on('message', (message) => {
-    if (message.type === 'transcript') {
+    if (message.type === 'transcript' && message.transcript) {
       console.log(`[Clariva transcript] ${message.role}: ${message.transcript}`);
+      transcriptBuffer.push({
+        role: message.role || 'unknown',
+        text: String(message.transcript).trim(),
+      });
     }
     if (message.type === 'function-call') {
       const { name, parameters } = message.functionCall;

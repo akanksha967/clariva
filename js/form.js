@@ -1,98 +1,11 @@
-import emailjs from 'https://esm.sh/@emailjs/browser@4.4.1';
+import { resolveBookingUrl, resolveBookingUrlForPage, clinics } from './clinics.js';
+import { getApiBase } from './config.js';
 
-/** Where your team receives new demo leads (must match the “To” field in EmailJS team template). */
-const TEAM_INBOX = 'hello@clariva.ai';
-
-/**
- * EmailJS — https://www.emailjs.com/
- *
- * Team template: To = fixed inbox (e.g. hello@clariva.ai).
- * Visitor template: the “To email” field MUST be a variable, e.g. {{user_email}} or {{to_email}}
- *   (if it is blank or static, EmailJS returns 422 “recipients address is empty”).
- * Variables sent: user_email, to_email, email (same value), clinic_name, …
- *
- * Account → Security: allow your domain (and http://localhost for local testing).
- */
-const EMAILJS = {
-  publicKey: '7Tyhp7REciU6WR6Gf',
-  serviceId: 'service_7junsyc',
-  templateTeam: 'template_hru8of6',
-  templateVisitor: 'template_q6w3tid',
-};
-
-function isEmailJsConfigured() {
-  return Boolean(
-    EMAILJS.publicKey &&
-    EMAILJS.serviceId &&
-    EMAILJS.templateTeam &&
-    EMAILJS.templateVisitor
-  );
-}
-
-/** Pass on every send — works even if init() runs late or fails silently. */
-function emailJsOptions() {
-  return { publicKey: EMAILJS.publicKey };
-}
-
-/**
- * EmailJS errors are often `{ status, text }`. Surfaces the real API message in the console.
- */
-function formatEmailJsError(err) {
-  if (err == null) return 'Unknown error';
-  if (typeof err === 'string') return err;
-  const text = err.text ?? err.message;
-  const status = err.status != null ? ` [${err.status}]` : '';
-  if (text) return `${text}${status}`;
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return String(err);
-  }
-}
-
-/**
- * Sends (1) notification to TEAM_INBOX and (2) confirmation to the visitor.
- */
-async function sendLeadEmails(userEmail, clinicName) {
-  const opts = emailJsOptions();
-  const teamParams = {
-    team_email: TEAM_INBOX,
-    user_email: userEmail,
-    clinic_name: clinicName,
-    reply_to: userEmail,
-  };
-  const visitorParams = {
-    user_email: userEmail,
-    to_email: userEmail,
-    email: userEmail,
-    clinic_name: clinicName,
-  };
-
-  try {
-    const r1 = await emailjs.send(
-      EMAILJS.serviceId,
-      EMAILJS.templateTeam,
-      teamParams,
-      opts
-    );
-    console.log('[Clariva] EmailJS team template OK:', r1);
-  } catch (err) {
-    console.error('[Clariva] EmailJS team template failed:', err);
-    throw new Error(`Team notification: ${formatEmailJsError(err)}`);
-  }
-
-  try {
-    const r2 = await emailjs.send(
-      EMAILJS.serviceId,
-      EMAILJS.templateVisitor,
-      visitorParams,
-      opts
-    );
-    console.log('[Clariva] EmailJS visitor template OK:', r2);
-  } catch (err) {
-    console.error('[Clariva] EmailJS visitor template failed:', err);
-    throw new Error(`Visitor confirmation: ${formatEmailJsError(err)}`);
-  }
+function clinicIdFromPracticeName(name) {
+  const n = (name || '').trim().toLowerCase();
+  if (!n) return null;
+  const found = Object.values(clinics).find((c) => c.clinic_name.toLowerCase() === n);
+  return found ? found.clinicId : null;
 }
 
 function isValidEmail(email) {
@@ -115,6 +28,32 @@ function trackDemoRequest(email, clinic) {
   console.log('[Clariva] Demo Lead Captured:', { email, clinic, timestamp: new Date().toISOString() });
 }
 
+async function submitLeadToApi(email, clinicName) {
+  const base = getApiBase();
+  if (!base) {
+    throw new Error(
+      'API not configured: set window.CLARIVA_API_BASE to your Clariva API origin (see index.html).'
+    );
+  }
+  const booking_url = resolveBookingUrl(clinicName);
+  const clinic_id = clinicIdFromPracticeName(clinicName);
+  const res = await fetch(`${base}/api/leads`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email,
+      clinic_name: clinicName,
+      clinic_id,
+      booking_url,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || `Lead save failed (${res.status})`);
+  }
+  return data;
+}
+
 export function initForm() {
   const form = document.getElementById('bookDemoForm');
   const btn = document.getElementById('ctaBtn');
@@ -125,8 +64,9 @@ export function initForm() {
 
   const defaultBtnLabel = btn.textContent;
 
-  if (isEmailJsConfigured()) {
-    emailjs.init({ publicKey: EMAILJS.publicKey });
+  const calLink = document.getElementById('calcomLink');
+  if (calLink) {
+    calLink.href = resolveBookingUrlForPage();
   }
 
   /** Email booking only — never starts the Vapi voice demo (that is `#vapiDemoBtn` in vapi.js). */
@@ -155,25 +95,17 @@ export function initForm() {
       return;
     }
 
-    if (!isEmailJsConfigured()) {
-      alert(
-        'Email booking is not configured. Contact us at ' +
-          TEAM_INBOX +
-          ' or use the voice demo button above.'
-      );
-      return;
-    }
-
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
     try {
-      await sendLeadEmails(email, clinic);
+      await submitLeadToApi(email, clinic);
       trackDemoRequest(email, clinic);
       showBookDemoSuccess(btn, defaultBtnLabel);
     } catch (err) {
-      const detail = err instanceof Error ? err.message : formatEmailJsError(err);
-      console.error('[Clariva] Book demo email failed:', detail, err);
+      const detail = err instanceof Error ? err.message : String(err);
+      console.error('[Clariva] Book demo failed:', detail, err);
+      alert(detail);
       btn.textContent = defaultBtnLabel;
     } finally {
       btn.disabled = false;
