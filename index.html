@@ -389,11 +389,9 @@
 
     <div class="cta-divider reveal"><span>or request a demo below</span></div>
 
-    <p class="cta-cal reveal">
-      <a id="calcomLink" class="cta-cal-link" href="#" target="_blank" rel="noopener noreferrer">Schedule a call on Cal.com →</a>
-    </p>
-
     <form id="bookDemoForm" class="cta-form reveal" novalidate>
+      <input class="cta-input" id="clinicNameInput" type="text" placeholder="Your practice name"
+        autocomplete="organization" aria-label="Practice name" name="clinic_name">
       <input class="cta-input" id="emailInput" type="email" placeholder="your@clinic.com"
         autocomplete="email" aria-label="Work email" name="email">
       <button class="cta-btn" id="ctaBtn" type="submit">Book My Demo</button>
@@ -468,8 +466,9 @@
 
   <!-- ── SCRIPTS ── -->
   <script>
-    // Clariva API origin (no trailing slash). Local: http://localhost:3000 — production: your API host.
-    window.CLARIVA_API_BASE = window.CLARIVA_API_BASE || 'http://localhost:3000';
+    // API origin for /api/* (book-demo, call-logs). Omit or '' on Vercel (same origin).
+    // Local API on another port: window.CLARIVA_API_BASE = 'http://localhost:3000';
+    window.CLARIVA_API_BASE = window.CLARIVA_API_BASE ?? '';
   </script>
   <script type="module" src="js/main.js"></script>
 

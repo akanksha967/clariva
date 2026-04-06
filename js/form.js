@@ -1,19 +1,11 @@
-import { resolveBookingUrl, resolveBookingUrlForPage, clinics } from './clinics.js';
 import { getApiBase } from './config.js';
-
-function clinicIdFromPracticeName(name) {
-  const n = (name || '').trim().toLowerCase();
-  if (!n) return null;
-  const found = Object.values(clinics).find((c) => c.clinic_name.toLowerCase() === n);
-  return found ? found.clinicId : null;
-}
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function showBookDemoSuccess(btn, originalLabel) {
-  btn.textContent = 'Thanks — check your email';
+  btn.textContent = "Thanks — we'll be in touch";
   btn.style.cssText =
     'background:#2d7a4f;border-color:#2d7a4f;color:white;cursor:default;' +
     'padding:15px 26px;font-size:12px;letter-spacing:.1em;';
@@ -24,32 +16,17 @@ function showBookDemoSuccess(btn, originalLabel) {
   }, 5000);
 }
 
-function trackDemoRequest(email, clinic) {
-  console.log('[Clariva] Demo Lead Captured:', { email, clinic, timestamp: new Date().toISOString() });
-}
-
-async function submitLeadToApi(email, clinicName) {
+async function submitLeadToApi(email, clinic_name) {
   const base = getApiBase();
-  if (!base) {
-    throw new Error(
-      'API not configured: set window.CLARIVA_API_BASE to your Clariva API origin (see index.html).'
-    );
-  }
-  const booking_url = resolveBookingUrl(clinicName);
-  const clinic_id = clinicIdFromPracticeName(clinicName);
-  const res = await fetch(`${base}/api/leads`, {
+  const url = `${base}/api/book-demo`;
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email,
-      clinic_name: clinicName,
-      clinic_id,
-      booking_url,
-    }),
+    body: JSON.stringify({ email, clinic_name }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.error || `Lead save failed (${res.status})`);
+    throw new Error(data.error || `Request failed (${res.status})`);
   }
   return data;
 }
@@ -58,28 +35,22 @@ export function initForm() {
   const form = document.getElementById('bookDemoForm');
   const btn = document.getElementById('ctaBtn');
   const emailInput = document.getElementById('emailInput');
-  const clinicInput = document.getElementById('clinicInput');
+  const clinicInput = document.getElementById('clinicNameInput');
 
-  if (!form || !btn || !emailInput) return;
+  if (!form || !btn || !emailInput || !clinicInput) return;
 
   const defaultBtnLabel = btn.textContent;
 
-  const calLink = document.getElementById('calcomLink');
-  if (calLink) {
-    calLink.href = resolveBookingUrlForPage();
-  }
-
-  /** Email booking only — never starts the Vapi voice demo (that is `#vapiDemoBtn` in vapi.js). */
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     const email = emailInput.value.trim();
-    const clinic = clinicInput ? clinicInput.value.trim() : '';
+    const clinic_name = clinicInput.value.trim();
 
-    if (!clinic) {
+    if (!clinic_name) {
       alert('Please enter your practice name.');
-      if (clinicInput) clinicInput.focus();
+      clinicInput.focus();
       return;
     }
 
@@ -99,8 +70,7 @@ export function initForm() {
     btn.textContent = 'Sending…';
 
     try {
-      await submitLeadToApi(email, clinic);
-      trackDemoRequest(email, clinic);
+      await submitLeadToApi(email, clinic_name);
       showBookDemoSuccess(btn, defaultBtnLabel);
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);

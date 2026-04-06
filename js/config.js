@@ -1,11 +1,11 @@
 /**
- * Runtime config for production APIs (set on window before modules load — see index.html).
- * No secrets here: only origins and optional public SDK identifiers.
+ * API origin for server routes (leads, call logs). No trailing slash.
+ * - Same-site Vercel: leave unset or '' so requests go to /api/* on this domain.
+ * - Separate API server: set window.CLARIVA_API_BASE = 'http://localhost:3000' in index.html.
  */
-
 export function getApiBase() {
   if (typeof window === 'undefined') return '';
-  const base = window.CLARIVA_API_BASE;
-  if (!base || typeof base !== 'string') return '';
-  return base.replace(/\/$/, '');
+  const b = window.CLARIVA_API_BASE;
+  if (b === undefined || b === null || String(b).trim() === '') return '';
+  return String(b).replace(/\/$/, '');
 }
