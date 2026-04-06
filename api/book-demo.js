@@ -13,8 +13,7 @@
  *   EMAILJS_TEMPLATE_VISITOR → email to THEM: "Thanks for your interest… {{clinic_name}} …"
  *
  * In each template, use {{clinic_name}} and {{user_email}} where you need them.
- * Set each template’s “To” field in EmailJS: visitor template → dynamic (e.g. {{user_email}});
- *   team template → your Clariva inbox, or use EmailJS “Send to” fixed address.
+ * In EmailJS → “To Email”: use {{email}} (we send `email`), or {{user_email}} / {{to_email}}.
  *
  * ── Resend (optional alternative — set RESEND_API_KEY; skips EmailJS) ─────────
  *   RESEND_API_KEY, EMAIL_FROM, NOTIFY_EMAIL (internal inbox)
@@ -33,9 +32,14 @@ function json(res, status, body) {
 }
 
 function emailJsParams(clinic_name, user_email) {
+  // EmailJS 422 "recipients address is empty" happens when the template "To Email"
+  // field references a name we don't send (e.g. {{to_email}}). Aliases cover common setups.
   return {
     clinic_name,
     user_email,
+    to_email: user_email,
+    email: user_email,
+    reply_to: user_email,
   };
 }
 
