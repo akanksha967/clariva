@@ -13,8 +13,7 @@
  *   EMAILJS_TEMPLATE_VISITOR → email to THEM: "Thanks for your interest… {{clinic_name}} …"
  *
  * In each template, use {{clinic_name}} and {{user_email}} where you need them.
- * Set each template’s “To” field in EmailJS: visitor template → dynamic (e.g. {{user_email}});
- *   team template → your Clariva inbox, or use EmailJS “Send to” fixed address.
+ * In EmailJS → “To Email”: use {{email}} (we send `email`), or {{user_email}} / {{to_email}}.
  *
  * ── Resend (optional alternative — set RESEND_API_KEY; skips EmailJS) ─────────
  *   RESEND_API_KEY, EMAIL_FROM, NOTIFY_EMAIL (internal inbox)
@@ -32,11 +31,24 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-function emailJsParams(clinic_name, user_email) {
+/** EmailJS expects string values; empty/undefined breaks {{email}} in "To Email". */
+function emailJsParams(clinic_name, rawEmail) {
+  const user_email = String(rawEmail || '').trim();
+  if (!user_email) {
+    throw new Error('Recipient email is empty');
+  }
+  const clinic = String(clinic_name || '').trim();
   return {
-    clinic_name,
+    clinic_name: clinic,
     user_email,
+    to_email: user_email,
+    email: user_email,
+    reply_to: user_email,
   };
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function sendEmailJSOne(service_id, template_id, user_id, accessToken, template_params) {
@@ -72,8 +84,9 @@ async function sendEmailJSDual({ clinic_name, user_email }) {
 
   const params = emailJsParams(clinic_name, user_email);
 
-  // Internal lead first, then visitor thank-you (same {{clinic_name}} / {{user_email}} in both)
+  // EmailJS allows only 1 request per second; back-to-back calls often fail the 2nd (422 / empty To).
   await sendEmailJSOne(service_id, template_team, user_id, accessToken, params);
+  await sleep(1100);
   await sendEmailJSOne(service_id, template_visitor, user_id, accessToken, params);
 }
 
