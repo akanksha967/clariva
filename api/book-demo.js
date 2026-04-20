@@ -31,16 +31,24 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-function emailJsParams(clinic_name, user_email) {
-  // EmailJS 422 "recipients address is empty" happens when the template "To Email"
-  // field references a name we don't send (e.g. {{to_email}}). Aliases cover common setups.
+/** EmailJS expects string values; empty/undefined breaks {{email}} in "To Email". */
+function emailJsParams(clinic_name, rawEmail) {
+  const user_email = String(rawEmail || '').trim();
+  if (!user_email) {
+    throw new Error('Recipient email is empty');
+  }
+  const clinic = String(clinic_name || '').trim();
   return {
-    clinic_name,
+    clinic_name: clinic,
     user_email,
     to_email: user_email,
     email: user_email,
     reply_to: user_email,
   };
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function sendEmailJSOne(service_id, template_id, user_id, accessToken, template_params) {
@@ -76,8 +84,9 @@ async function sendEmailJSDual({ clinic_name, user_email }) {
 
   const params = emailJsParams(clinic_name, user_email);
 
-  // Internal lead first, then visitor thank-you (same {{clinic_name}} / {{user_email}} in both)
+  // EmailJS allows only 1 request per second; back-to-back calls often fail the 2nd (422 / empty To).
   await sendEmailJSOne(service_id, template_team, user_id, accessToken, params);
+  await sleep(1100);
   await sendEmailJSOne(service_id, template_visitor, user_id, accessToken, params);
 }
 
