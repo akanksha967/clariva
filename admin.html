@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clariva Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f5f7f5; color: #1a2e1a; min-height: 100vh; }
+
+    /* ── Auth screen ── */
+    #auth-screen {
+      display: flex; align-items: center; justify-content: center; height: 100vh;
+    }
+    .auth-box {
+      background: white; border-radius: 12px; padding: 2.5rem;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08); width: 100%; max-width: 360px;
+    }
+    .auth-box h1 { font-size: 1.4rem; margin-bottom: 1.5rem; color: #4a7c59; }
+
+    /* ── Main layout ── */
+    #main { display: none; }
+    .topbar {
+      background: #4a7c59; color: white; padding: .9rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-logo { font-weight: 600; font-size: 1.1rem; letter-spacing: -.01em; }
+    .topbar-logout { background: none; border: 1px solid rgba(255,255,255,.4); color: white;
+      padding: .35rem .9rem; border-radius: 6px; cursor: pointer; font-size: .85rem; }
+
+    .container { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .card {
+      background: white; border-radius: 12px; padding: 1.75rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 2rem;
+    }
+    .card h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 1.25rem; color: #2d4a2d; }
+
+    /* ── Form grid ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    .form-grid .full { grid-column: 1 / -1; }
+    label { display: block; font-size: .8rem; font-weight: 500; color: #555; margin-bottom: .3rem; }
+    input, select {
+      width: 100%; padding: .6rem .8rem; border: 1px solid #d4ddd4; border-radius: 7px;
+      font-size: .9rem; font-family: inherit; color: #1a2e1a; background: #fafcfa;
+    }
+    input:focus, select:focus { outline: none; border-color: #4a7c59; background: white; }
+
+    .btn {
+      padding: .65rem 1.4rem; border-radius: 7px; font-size: .9rem; font-weight: 600;
+      cursor: pointer; border: none; font-family: inherit;
+    }
+    .btn-primary { background: #4a7c59; color: white; }
+    .btn-primary:hover { background: #3d6b4a; }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-sm { padding: .4rem .85rem; font-size: .8rem; font-weight: 500; }
+    .btn-outline { background: none; border: 1px solid #4a7c59; color: #4a7c59; }
+    .btn-outline:hover { background: #f0f7f2; }
+
+    .msg { margin-top: .9rem; font-size: .85rem; padding: .6rem .9rem; border-radius: 7px; display: none; }
+    .msg.ok { background: #e8f5ec; color: #2d6a3f; display: block; }
+    .msg.err { background: #fdecea; color: #a33; display: block; }
+
+    /* ── Clinics table ── */
+    .clinic-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    .clinic-table th { text-align: left; padding: .5rem .75rem; font-size: .75rem;
+      text-transform: uppercase; letter-spacing: .04em; color: #888; border-bottom: 1px solid #eee; }
+    .clinic-table td { padding: .7rem .75rem; border-bottom: 1px solid #f2f4f2; vertical-align: middle; }
+    .clinic-table tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: .2rem .55rem; border-radius: 99px; font-size: .75rem; font-weight: 500; }
+    .badge-green { background: #e4f4ea; color: #2d6a3f; }
+    .badge-grey { background: #f0f0f0; color: #888; }
+    .empty { text-align: center; padding: 2rem; color: #aaa; font-size: .9rem; }
+  </style>
+</head>
+<body>
+
+<!-- ── Auth Screen ── -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <h1>Clariva Admin</h1>
+    <div>
+      <label for="secretInput">Admin password</label>
+      <input type="password" id="secretInput" placeholder="Enter admin secret" style="margin-bottom:1rem">
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="login()">Sign in</button>
+    <div id="auth-msg" class="msg"></div>
+  </div>
+</div>
+
+<!-- ── Main App ── -->
+<div id="main">
+  <div class="topbar">
+    <div class="topbar-logo">Clariva Admin</div>
+    <button class="topbar-logout btn btn-sm" onclick="logout()">Sign out</button>
+  </div>
+
+  <div class="container">
+
+    <!-- Add Clinic -->
+    <div class="card">
+      <h2>Add New Clinic</h2>
+      <form id="addClinicForm">
+        <div class="form-grid">
+          <div>
+            <label>Clinic ID <span style="color:#aaa;font-weight:400">(slug, e.g. green-valley)</span></label>
+            <input type="text" id="f_clinic_id" placeholder="green-valley" required pattern="[a-z0-9\-]+">
+          </div>
+          <div>
+            <label>Clinic Name</label>
+            <input type="text" id="f_clinic_name" placeholder="Green Valley Medical" required>
+          </div>
+          <div>
+            <label>Forwarded Phone Number <span style="color:#aaa;font-weight:400">(E.164)</span></label>
+            <input type="text" id="f_phone" placeholder="+14155550100" required>
+          </div>
+          <div>
+            <label>Timezone</label>
+            <select id="f_timezone">
+              <option value="America/New_York">America/New_York (ET)</option>
+              <option value="America/Chicago">America/Chicago (CT)</option>
+              <option value="America/Denver">America/Denver (MT)</option>
+              <option value="America/Los_Angeles">America/Los_Angeles (PT)</option>
+              <option value="America/Phoenix">America/Phoenix (AZ)</option>
+              <option value="Pacific/Honolulu">Pacific/Honolulu (HI)</option>
+            </select>
+          </div>
+          <div>
+            <label>Opening Time</label>
+            <input type="time" id="f_open_time" value="09:00">
+          </div>
+          <div>
+            <label>Closing Time</label>
+            <input type="time" id="f_close_time" value="17:00">
+          </div>
+          <div>
+            <label>Emergency Number</label>
+            <input type="text" id="f_emergency" value="911">
+          </div>
+          <div>
+            <label>Callback Time</label>
+            <input type="text" id="f_callback" value="the next business day" placeholder="the next business day">
+          </div>
+        </div>
+        <div style="margin-top:1.25rem">
+          <button type="submit" class="btn btn-primary" id="addBtn">Add Clinic</button>
+        </div>
+        <div id="add-msg" class="msg"></div>
+      </form>
+    </div>
+
+    <!-- Clinic List -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+        <h2 style="margin:0">Clinics</h2>
+        <button class="btn btn-outline btn-sm" onclick="loadClinics()">Refresh</button>
+      </div>
+      <div id="clinic-list"><p class="empty">Loading…</p></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let ADMIN_SECRET = '';
+
+  function login() {
+    const val = document.getElementById('secretInput').value.trim();
+    if (!val) return showMsg('auth-msg', 'err', 'Enter the admin secret.');
+    ADMIN_SECRET = val;
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    loadClinics();
+  }
+
+  function logout() {
+    ADMIN_SECRET = '';
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('main').style.display = 'none';
+    document.getElementById('secretInput').value = '';
+  }
+
+  document.getElementById('secretInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  function showMsg(id, type, text) {
+    const el = document.getElementById(id);
+    el.className = `msg ${type}`;
+    el.textContent = text;
+  }
+
+  async function loadClinics() {
+    const container = document.getElementById('clinic-list');
+    container.innerHTML = '<p class="empty">Loading…</p>';
+    try {
+      const r = await fetch('/api/admin/list-clinics', {
+        headers: { 'x-admin-secret': ADMIN_SECRET },
+      });
+      if (r.status === 401) { logout(); return; }
+      const data = await r.json();
+      renderClinics(data.clinics || []);
+    } catch (e) {
+      container.innerHTML = `<p class="empty" style="color:#c44">Failed to load clinics.</p>`;
+    }
+  }
+
+  function renderClinics(clinics) {
+    const container = document.getElementById('clinic-list');
+    if (!clinics.length) {
+      container.innerHTML = '<p class="empty">No clinics yet. Add one above.</p>';
+      return;
+    }
+    container.innerHTML = `
+      <table class="clinic-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>ID</th>
+            <th>Phone</th>
+            <th>Hours</th>
+            <th>Google Calendar</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${clinics.map(c => `
+            <tr>
+              <td><strong>${esc(c.clinic_name)}</strong></td>
+              <td style="font-family:monospace;color:#888;font-size:.8rem">${esc(c.clinic_id)}</td>
+              <td style="font-family:monospace;font-size:.85rem">${esc(c.inbound_phone_e164)}</td>
+              <td style="font-size:.82rem">${esc(c.open_time)} – ${esc(c.close_time)}</td>
+              <td>
+                ${c.google_calendar_connected
+                  ? '<span class="badge badge-green">Connected</span>'
+                  : '<span class="badge badge-grey">Not connected</span>'}
+              </td>
+              <td>
+                ${!c.google_calendar_connected
+                  ? `<a href="/api/auth/google-start?clinic_id=${encodeURIComponent(c.clinic_id)}&secret=${encodeURIComponent(ADMIN_SECRET)}"
+                       target="_blank" class="btn btn-outline btn-sm">Connect Calendar</a>`
+                  : ''}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('addClinicForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('addBtn');
+    btn.disabled = true;
+    btn.textContent = 'Adding…';
+
+    const body = {
+      clinic_id: document.getElementById('f_clinic_id').value.trim(),
+      clinic_name: document.getElementById('f_clinic_name').value.trim(),
+      inbound_phone_e164: document.getElementById('f_phone').value.trim(),
+      timezone: document.getElementById('f_timezone').value,
+      open_time: document.getElementById('f_open_time').value,
+      close_time: document.getElementById('f_close_time').value,
+      emergency_number: document.getElementById('f_emergency').value.trim(),
+      callback_time: document.getElementById('f_callback').value.trim(),
+    };
+
+    try {
+      const r = await fetch('/api/admin/add-clinic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-secret': ADMIN_SECRET },
+        body: JSON.stringify(body),
+      });
+      const data = await r.json();
+      if (r.ok) {
+        showMsg('add-msg', 'ok', `Clinic "${data.clinic?.clinic_name}" added! Now connect their Google Calendar below.`);
+        e.target.reset();
+        loadClinics();
+      } else {
+        showMsg('add-msg', 'err', data.error || 'Failed to add clinic.');
+      }
+    } catch {
+      showMsg('add-msg', 'err', 'Network error.');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Add Clinic';
+  });
+</script>
+</body>
+</html>
