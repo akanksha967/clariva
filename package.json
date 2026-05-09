@@ -1,0 +1,8 @@
+{
+  "name": "clariva-site",
+  "private": true,
+  "description": "Static site + Vercel serverless (book-demo, Vapi server URL)",
+  "dependencies": {
+    "googleapis": "^144.0.0"
+  }
+}
