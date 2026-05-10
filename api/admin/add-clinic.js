@@ -1,7 +1,6 @@
 /**
  * POST /api/admin/add-clinic
- * Body: { clinic_id, clinic_name, inbound_phone_e164, open_time, close_time,
- *         callback_time, emergency_number, timezone }
+ * Body: { id, name, inbound_phone, open_time, close_time, emergency_number, timezone, calcom_url }
  * Header: x-admin-secret: <ADMIN_SECRET env var>
  */
 
@@ -37,14 +36,13 @@ module.exports = async function handler(req, res) {
   }
 
   const body = parseBody(req);
-  const { clinic_id, clinic_name, inbound_phone_e164, open_time, close_time,
-    callback_time, emergency_number, timezone } = body;
+  const { id, name, inbound_phone, open_time, close_time, emergency_number, timezone, calcom_url } = body;
 
-  if (!clinic_id || !clinic_name || !inbound_phone_e164) {
-    return sendJson(res, 400, { error: 'clinic_id, clinic_name, and inbound_phone_e164 are required' });
+  if (!id || !name || !inbound_phone) {
+    return sendJson(res, 400, { error: 'id, name, and inbound_phone are required' });
   }
 
-  const phone = normalizeE164(inbound_phone_e164);
+  const phone = normalizeE164(inbound_phone);
   if (!phone) return sendJson(res, 400, { error: 'Invalid phone number format' });
 
   const base = process.env.SUPABASE_URL?.replace(/\/$/, '');
@@ -52,14 +50,14 @@ module.exports = async function handler(req, res) {
   if (!base || !key) return sendJson(res, 500, { error: 'Supabase not configured' });
 
   const row = {
-    clinic_id: clinic_id.trim().toLowerCase().replace(/\s+/g, '-'),
-    clinic_name: clinic_name.trim(),
+    id: id.trim().toLowerCase().replace(/\s+/g, '-'),
+    name: name.trim(),
     inbound_phone_e164: phone,
     open_time: open_time || '09:00',
     close_time: close_time || '17:00',
-    callback_time: callback_time || 'the next business day',
     emergency_number: emergency_number || '911',
     timezone: timezone || 'America/New_York',
+    calcom_url: calcom_url || null,
   };
 
   const r = await fetch(`${base}/rest/v1/clinics`, {

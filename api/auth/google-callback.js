@@ -63,7 +63,7 @@ module.exports = async function handler(req, res) {
       Prefer: 'resolution=merge-duplicates',
     },
     body: JSON.stringify({
-      clinic_id,
+      clinic_id: clinic_id,
       google_refresh_token: tokens.refresh_token,
       google_calendar_id: 'primary',
       updated_at: new Date().toISOString(),
