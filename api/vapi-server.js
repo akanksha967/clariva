@@ -99,14 +99,25 @@ async function resolveClinicFromSupabase(dialedRaw) {
 
   const q =
     `inbound_phone_e164=eq.${encodeURIComponent(dialed)}` +
-    '&select=clinic_id,clinic_name,open_time,close_time,callback_time,emergency_number,timezone' +
+    '&select=id,name,open_time,close_time,emergency_number,timezone,calcom_url' +
     '&limit=1';
   const r = await fetch(`${base}/rest/v1/clinics?${q}`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
   });
   if (!r.ok) return null;
   const rows = await r.json().catch(() => []);
-  return rows[0] && typeof rows[0] === 'object' ? rows[0] : null;
+  const row = rows[0] && typeof rows[0] === 'object' ? rows[0] : null;
+  if (!row) return null;
+  // normalize to the field names the rest of the code expects
+  return {
+    clinic_id: row.id,
+    clinic_name: row.name,
+    open_time: row.open_time,
+    close_time: row.close_time,
+    emergency_number: row.emergency_number,
+    timezone: row.timezone,
+    calcom_url: row.calcom_url,
+  };
 }
 
 function resolveClinicFromEnvMap(dialedRaw) {

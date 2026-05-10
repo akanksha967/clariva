@@ -35,12 +35,12 @@ module.exports = async function handler(req, res) {
   ]);
 
   const clinics = await clinicsRes.json().catch(() => []);
-  const integrations = await integrationsRes.json().catch(() => []);
+  const integrations = integrationsRes.ok ? await integrationsRes.json().catch(() => []) : [];
   const connectedIds = new Set(integrations.map(i => i.clinic_id));
 
-  const result = clinics.map(c => ({
+  const result = (Array.isArray(clinics) ? clinics : []).map(c => ({
     ...c,
-    google_calendar_connected: connectedIds.has(c.clinic_id),
+    google_calendar_connected: connectedIds.has(c.id),
   }));
 
   return sendJson(res, 200, { clinics: result });

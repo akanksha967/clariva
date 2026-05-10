@@ -106,11 +106,11 @@
         <div class="form-grid">
           <div>
             <label>Clinic ID <span style="color:#aaa;font-weight:400">(slug, e.g. green-valley)</span></label>
-            <input type="text" id="f_clinic_id" placeholder="green-valley" required pattern="[a-z0-9\-]+">
+            <input type="text" id="f_id" placeholder="green-valley" required pattern="[a-z0-9\-]+">
           </div>
           <div>
             <label>Clinic Name</label>
-            <input type="text" id="f_clinic_name" placeholder="Green Valley Medical" required>
+            <input type="text" id="f_name" placeholder="Green Valley Medical" required>
           </div>
           <div>
             <label>Forwarded Phone Number <span style="color:#aaa;font-weight:400">(E.164)</span></label>
@@ -140,8 +140,8 @@
             <input type="text" id="f_emergency" value="911">
           </div>
           <div>
-            <label>Callback Time</label>
-            <input type="text" id="f_callback" value="the next business day" placeholder="the next business day">
+            <label>Cal.com Booking URL <span style="color:#aaa;font-weight:400">(optional)</span></label>
+            <input type="text" id="f_calcom_url" placeholder="https://cal.com/your-clinic">
           </div>
         </div>
         <div style="margin-top:1.25rem">
@@ -228,9 +228,9 @@
         <tbody>
           ${clinics.map(c => `
             <tr>
-              <td><strong>${esc(c.clinic_name)}</strong></td>
-              <td style="font-family:monospace;color:#888;font-size:.8rem">${esc(c.clinic_id)}</td>
-              <td style="font-family:monospace;font-size:.85rem">${esc(c.inbound_phone_e164)}</td>
+              <td><strong>${esc(c.name)}</strong></td>
+              <td style="font-family:monospace;color:#888;font-size:.8rem">${esc(c.id)}</td>
+              <td style="font-family:monospace;font-size:.85rem">${esc(c.inbound_phone_e164 || '—')}</td>
               <td style="font-size:.82rem">${esc(c.open_time)} – ${esc(c.close_time)}</td>
               <td>
                 ${c.google_calendar_connected
@@ -239,7 +239,7 @@
               </td>
               <td>
                 ${!c.google_calendar_connected
-                  ? `<a href="/api/auth/google-start?clinic_id=${encodeURIComponent(c.clinic_id)}&secret=${encodeURIComponent(ADMIN_SECRET)}"
+                  ? `<a href="/api/auth/google-start?clinic_id=${encodeURIComponent(c.id)}&secret=${encodeURIComponent(ADMIN_SECRET)}"
                        target="_blank" class="btn btn-outline btn-sm">Connect Calendar</a>`
                   : ''}
               </td>
@@ -261,14 +261,14 @@
     btn.textContent = 'Adding…';
 
     const body = {
-      clinic_id: document.getElementById('f_clinic_id').value.trim(),
-      clinic_name: document.getElementById('f_clinic_name').value.trim(),
-      inbound_phone_e164: document.getElementById('f_phone').value.trim(),
+      id: document.getElementById('f_id').value.trim(),
+      name: document.getElementById('f_name').value.trim(),
+      inbound_phone: document.getElementById('f_phone').value.trim(),
       timezone: document.getElementById('f_timezone').value,
       open_time: document.getElementById('f_open_time').value,
       close_time: document.getElementById('f_close_time').value,
       emergency_number: document.getElementById('f_emergency').value.trim(),
-      callback_time: document.getElementById('f_callback').value.trim(),
+      calcom_url: document.getElementById('f_calcom_url').value.trim() || null,
     };
 
     try {
@@ -279,7 +279,7 @@
       });
       const data = await r.json();
       if (r.ok) {
-        showMsg('add-msg', 'ok', `Clinic "${data.clinic?.clinic_name}" added! Now connect their Google Calendar below.`);
+        showMsg('add-msg', 'ok', `Clinic "${data.clinic?.name}" added! Now connect their Google Calendar below.`);
         e.target.reset();
         loadClinics();
       } else {
